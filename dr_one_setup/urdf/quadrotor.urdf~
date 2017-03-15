@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<robot name="dr_one">
+
+    <!-- Included URDF Files -->
+    <xacro:include filename="$(find dr_one_setup)/urdf/quadrotor_base.urdf.xacro" />
+    
+    <!-- Instantiate quadrotor_base_macro once (has no parameters atm) -->
+    <xacro:quadrotor_base_macro />
+
+</robot>

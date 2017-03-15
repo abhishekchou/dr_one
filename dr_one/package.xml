@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>dr_one</name>
+  <version>0.0.0</version>
+  <description>The dr_one package</description>
+
+  <maintainer email="rpl@todo.todo">rpl</maintainer>
+
+  <license>TODO</license>
+
+  <author email="acho@kth.se">Abhishek Choudhary</author>
+  <buildtool_depend>catkin</buildtool_depend>
+
+
+  <export>
+	<metapackage />
+  </export>
+</package>
