@@ -53,7 +53,7 @@ int main(int argc, char** argv)
                 tf::Transform(
                             tf::createQuaternionFromRPY(_laser_rot_x,_laser_rot_y,_laser_rot_z),
                             tf::Vector3(_laser_tr_x,_laser_tr_y,_laser_tr_z)),
-                            ros::Time::now(),"base_link","base_laser" ));
+                            ros::Time::now(),"base_link","laser" ));
 
 //          //Transform for camera
 //        broadcaster.sendTransform(

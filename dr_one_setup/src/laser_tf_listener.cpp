@@ -13,7 +13,7 @@ Publisher laser_pub;
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     tf::TransformListener listener;
-    listener.waitForTransform("/base_laser","/base_link",Time(0),Duration(5.0));
+    listener.waitForTransform("/laser","/base_link",Time(0),Duration(5.0));
     sensor_msgs::LaserScan converted_scan;
     converted_scan.header = msg->header;
     converted_scan.angle_min = msg->angle_min;
@@ -31,7 +31,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
         float angle = msg->angle_min + (i * msg->angle_increment);
         geometry_msgs::PointStamped laser_pt;
 
-        laser_pt.header.frame_id = "/base_laser";
+        laser_pt.header.frame_id = "/laser";
         laser_pt.header.stamp = Time();
         laser_pt.point.x = range*cos(angle);
         laser_pt.point.y = range*sin(angle);
