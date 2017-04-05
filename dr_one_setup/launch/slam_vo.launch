@@ -1,0 +1,16 @@
+
+<launch>
+<!-- Launch file for Model, Laser & Rviz -->
+  <include file="$(find dr_one_setup)/launch/model.launch"/>
+
+<!-- Laser odometry node -->
+  <node pkg="laser_odom" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry">
+    <param name="laser_scan_topic" value="/scan"/>
+    <param name="base_frame_id" value="/base_link"/>
+    <param name="odom_frame_id" value="/odom" />
+    <param name="freq" value="6.0"/>
+  </node>
+
+<!-- Launch file for SLAM  -->
+  <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" />
+</launch>
