@@ -17,6 +17,12 @@ using costmap_2d::FREE_SPACE;
 
 FrontierSearch::FrontierSearch(costmap_2d::Costmap2D &costmap) : costmap_(costmap) { }
 
+/*
+ * @brief: Search the costmap with BFS, find new frontier cells and return a list
+ *
+ * @param: frontier_list List of frontier cells within prescribed geometric shape
+ *
+ */
 std::list<Frontier> FrontierSearch::searchFrom(geometry_msgs::Point position)
 {
 
@@ -41,7 +47,7 @@ std::list<Frontier> FrontierSearch::searchFrom(geometry_msgs::Point position)
     std::vector<bool> frontier_flag(size_x_ * size_y_, false);
     std::vector<bool> visited_flag(size_x_ * size_y_, false);
 
-    //initialize breadth first search
+    //initialize BFS
     std::queue<unsigned int> bfs;
 
     //find closest clear cell to start search
@@ -88,6 +94,11 @@ std::list<Frontier> FrontierSearch::searchFrom(geometry_msgs::Point position)
 
 }
 
+
+/*
+ * @brief  Build new list give a neighbour, position and an indexed flag with information. Check
+ *         8-neighbours and to list if the cells qualify
+ */
 Frontier FrontierSearch::buildNewFrontier(unsigned int initial_cell, unsigned int reference, std::vector<bool>& frontier_flag)
 {
 
@@ -160,6 +171,11 @@ Frontier FrontierSearch::buildNewFrontier(unsigned int initial_cell, unsigned in
     return output;
 }
 
+
+/*
+ * @brief function name is self-explanatory
+ *
+ */
 bool FrontierSearch::isNewFrontierCell(unsigned int idx, const std::vector<bool>& frontier_flag)
 {
 

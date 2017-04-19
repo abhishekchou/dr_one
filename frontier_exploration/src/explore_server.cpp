@@ -30,7 +30,7 @@ public:
 
     /*
      * @brief Constructor for the server, sets up this node's ActionServer for exploration
-     * and ActionClient to move_base for robot movement.
+     *         and ActionClient to move_base for robot movement.
      *
      * @param "name" Name for SimpleActionServer
      */
