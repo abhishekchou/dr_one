@@ -13,4 +13,7 @@
 <!-- Launch file for SLAM  -->
   <include file="$(find dr_one_setup)/launch/dr_one_slam.launch" /> -->
  <!--  <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" /> -->
+
+<!-- Launch file for SLAM  -->
+  <include file="$(find dr_one_setup)/launch/global_map.launch" />
 </launch>
