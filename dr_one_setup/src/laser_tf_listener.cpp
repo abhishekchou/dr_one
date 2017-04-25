@@ -50,7 +50,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 
         catch(tf::TransformException& ex)
         {
-            ROS_ERROR("Exception received: %s",ex.what());
+            ROS_ERROR("_LASER TF LISTENER_::Exception received: %s",ex.what());
         }
     }//end for
 

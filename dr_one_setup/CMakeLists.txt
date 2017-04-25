@@ -16,6 +16,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs  
   geometry_msgs
+  nav_msgs
  )
 
 catkin_package()
@@ -27,5 +28,9 @@ add_dependencies(tf_broadcaster dr_one_setup)
 add_executable(laser_tf_listener src/laser_tf_listener.cpp)
 target_link_libraries(laser_tf_listener ${catkin_LIBRARIES})
 add_dependencies(laser_tf_listener dr_one_setup)
+
+add_executable(vodom_tf_listener src/vodom_tf_listener.cpp)
+target_link_libraries(vodom_tf_listener ${catkin_LIBRARIES})
+add_dependencies(vodom_tf_listener dr_one_setup)
 
 

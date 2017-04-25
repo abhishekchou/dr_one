@@ -85,6 +85,7 @@ void CLaserOdometry2D::Init()
     catch (tf::TransformException &ex)
     {
         ROS_ERROR("%s",ex.what());
+        ROS_INFO("I am from the lidar odometry node. Nice to meet you");
         ros::Duration(1.0).sleep();
     }
 

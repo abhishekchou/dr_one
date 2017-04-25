@@ -7,7 +7,7 @@ int main(int argc, char** argv)
     ros::init(argc,argv,"tf_publisher");
     ros::NodeHandle n("~");
     ros::Rate r(100);
-    tf::TransformBroadcaster broadcaster;
+    static tf::TransformBroadcaster broadcaster;
     double _laser_tr_x, _laser_tr_y, _laser_tr_z, _laser_rot_x, _laser_rot_y, _laser_rot_z,
            _cam_tr_x, _cam_tr_y, _cam_tr_z, _cam_rot_x, _cam_rot_y, _cam_rot_z;
 
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
                 tf::Transform(
                             tf::createQuaternionFromRPY(_laser_rot_x,_laser_rot_y,_laser_rot_z),
                             tf::Vector3(_laser_tr_x,_laser_tr_y,_laser_tr_z)),
-                            ros::Time::now(),"base_link","laser" ));
+                            ros::Time::now(),"/base_link","/laser" ));
 
 //          //Transform for camera
 //        broadcaster.sendTransform(
