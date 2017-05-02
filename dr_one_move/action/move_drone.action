@@ -1,0 +1,7 @@
+#goal definiton
+geometry_msgs/PoseStamped target_pose
+---
+#result definition
+---
+#feedback
+geometry_msgs/PoseStamped current_pose

@@ -218,7 +218,10 @@ namespace frontier_exploration
         }
 
         //if empty boundary provided, set to whole map
-        if(polygon_.points.empty())
+
+        //Change to make polygon always equal to the whole map
+        if(polygon_.points.empty()|| !polygon_.points.empty())
+//        if(polygon_.points.empty())
         {
             geometry_msgs::Point32 temp;
             temp.x = getOriginX();

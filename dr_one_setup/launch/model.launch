@@ -18,7 +18,7 @@
 
   <node pkg="dr_one_setup" name="tf_broadcaster" type="tf_broadcaster" args="/tf_broadcaster"/>
   <node pkg="dr_one_setup" name="laser_tf_listener" type="laser_tf_listener"/>
-  <node pkg="dr_one_setup" name="vodom_tf_listener" type="vodom_tf_listener"/>
+<!--  <node pkg="dr_one_setup" name="vodom_tf_listener" type="vodom_tf_listener"/> -->
 
   <node pkg="rviz" name="rviz" type="rviz" args="-d $(find dr_one_setup)/test_model.rviz" />
 

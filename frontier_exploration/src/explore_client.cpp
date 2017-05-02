@@ -112,7 +112,7 @@ private:
             {
                 actionlib::SimpleActionClient<frontier_exploration::ExploreTaskAction> exploreClient("explore_server", true);
                 exploreClient.waitForServer();
-                ROS_INFO("Sending goal");
+                ROS_INFO("Sending goal: (%f,%f)", point->point.x, point->point.y);
                 frontier_exploration::ExploreTaskGoal goal;
                 goal.explore_center = *point;
                 goal.explore_boundary = input_;
