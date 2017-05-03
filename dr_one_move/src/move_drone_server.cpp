@@ -22,27 +22,27 @@ protected:
 public:
     move_drone(string name);
     geometry_msgs::PoseStamped current_pose; //Save pose from mavros here
-    geometry_msgs::PoseStamped pose_frontier;
-    vector<geometry_msgs::Pose2D> goal_array;
+    geometry_msgs::Pose2D goal;
+    vector<geometry_msgs::Pose2D> path;
 
 private:
     void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void exCallback(const dr_one_move::move_droneGoalConstPtr &goal);
     Subscriber pose_sub;
-    Publisher pose_pub;
-    string _position_topic, _goal_topic;
+    Publisher goal_pub;
+    string _pose_topic, _goal_topic;
 
 move_drone::move_drone(string name) :
     action(nh_, name, boost::bind(&move_droneAction::executeCB, this, _1), false),
     move_drone(name)
 {
     action.start();
-    ROS_INFO("_move_drone_:Constructing an object of class MOVE_DRONE");
-    pose_sub = nh_.subscribe<geometry_msgs::PoseStamped>(_position_topic.data(), 5, &move_drone::poseCallback, this);
-    pose_pub = nh_.advertise<geometry_msgs::PoseStamped>(_goal_topic.data(),5);
+    ROS_WARN("_move_drone_:Constructing an object of class MOVE_DRONE");
+    pose_sub = nh_.subscribe<geometry_msgs::PoseStamped>(_pose_topic.data(), 5, &move_drone::poseCallback, this);
+    goal_pub = nh_.advertise<geometry_msgs::Pose2D>(_goal_topic.data(),5);
 }
 
-//Save pose from MAVROS topic into PoseStamped variable
+//Save pose from EKF_POSE/MAVROS_POSE in a PoseStamped variable
 void move_drone::poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
     current_pose.header = msg->header;
@@ -51,9 +51,22 @@ void move_drone::poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 
 void move_drone::executeCB(const dr_one_move::move_droneGoalConstPtr &goal)
 {
+
+
     Rate loop_rate(20);
-    bool success = true;
-    ROS_INFO("Sending Setpoint to /mavros/setpoints for drone to navigate");
+    bool success = false;
+    ROS_WARN("_move_drone_:Sending Setpoint to /mavros/setpoints for drone to navigate");
+    spinOnce(); //Get most current pose.
+    while(ok() && !success)
+    {
+        if(action.isPreemptRequested()){
+            if(action.isNewGoalAvailable()){
+
+            }
+        }
+
+
+    }
     for(int i=0; i<=goal->order;i++)
     {
       if(action.isPreemptRequested()||!ros.ok())
@@ -64,14 +77,7 @@ void move_drone::executeCB(const dr_one_move::move_droneGoalConstPtr &goal)
           break;
       }
 
-      
     }
-
-
- 
-     
-    
-
 }
 
 
