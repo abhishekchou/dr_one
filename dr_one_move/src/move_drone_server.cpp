@@ -133,7 +133,6 @@ void move_drone::executeCB(const dr_one_move::move_droneGoalConstPtr &target)
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "move_drone");
-
   move_droneAction move_drone("move_drone");
   ros::spin();
 
