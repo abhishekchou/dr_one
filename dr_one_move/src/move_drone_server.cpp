@@ -126,9 +126,6 @@ void move_drone::executeCB(const dr_one_move::move_droneGoalConstPtr &target)
                 ROS_WARN("_move_drone_:New Goal Received from Exploration");
                 new_target = action.acceptNewGoal();
 
-//                double roll, pitch, yaw;
-//                Matrix3x3 m(new_target.target_pose.pose.orientation);
-//                m.getRPY(roll,pitch,yaw);
                 goal.x = new_target.target_pose.pose.position.x;
                 goal.y = new_target.target_pose.pose.position.y;
                 goal.theta = getYAW(new_target.target_pose.pose.orientation);
@@ -142,9 +139,7 @@ void move_drone::executeCB(const dr_one_move::move_droneGoalConstPtr &target)
         goal.theta = getYAW(target->target_pose.pose.orientation);
 
         goal_pub.publish(goal);
-        //Send Feeback
         spinOnce;
-
         loop_rate.sleep();
 
         if(distance(current_pose, goal) < 0.20)//If within 20cm of goal
