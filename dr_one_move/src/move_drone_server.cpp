@@ -19,11 +19,18 @@ class move_drone
 protected:
     NodeHandle nh_;
     SimpleActionServer<dr_one_move::move_droneAction> action;
+    string mover_drone;
     dr_one_move::move_droneFeedback feedback_;
     dr_one_move::move_droneResult result_;
 
 public:
-//    move_drone(string name);
+    move_drone(string name);
+    ~move_drone();
+
+    Subscriber pose_sub;
+    Publisher goal_pub;
+    string _pose_topic, _goal_topic;
+
     geometry_msgs::Pose2D current_pose; //Save pose from mavros here
     geometry_msgs::Pose2D goal;
     vector<geometry_msgs::Pose2D> path;
@@ -33,13 +40,12 @@ private:
     void exCallback(const dr_one_move::move_droneGoalConstPtr &goal);
     double getYAW(geometry_msgs::Quaternion quat);
     double distance(geometry_msgs::Pose2D start, geometry_msgs::Pose2D end);
-    Subscriber pose_sub;
-    Publisher goal_pub;
-    string _pose_topic, _goal_topic;
 
-move_drone(string move_drone) :
-    action(nh_, "move_drone", boost::bind(&move_droneAction::executeCB, this, _1), false),
-    move_drone(move_drone)
+};
+
+move_drone::move_drone(string name) :
+    action(nh_, name, boost::bind(&move_droneAction::executeCB, this, _1), false),
+    mover_drone(name)
 {
     action.start();
     ROS_WARN("_move_drone_:Constructing an object of class MOVE_DRONE");
@@ -47,7 +53,10 @@ move_drone(string move_drone) :
     goal_pub = nh_.advertise<geometry_msgs::Pose2D>(_goal_topic.data(),5);
 }
 
-};
+move_drone::~move_drone()
+{
+    ROS_WARN("_move_drone_:Deleting an object of class MOVE_DRONE");
+}
 
 double move_drone::getYAW(geometry_msgs::Quaternion quat)
 {
