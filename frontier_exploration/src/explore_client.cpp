@@ -1,26 +1,29 @@
+//______________ C++________//
+#include <boost/foreach.hpp>
 #include <ros/ros.h>
 #include <ros/wall_timer.h>
 
-#include <actionlib/client/simple_action_client.h>
-
+//_______________Map_________//
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
 #include <costmap_2d/footprint.h>
+#include <visualization_msgs/Marker.h>
 
+//_______________Messages____________//
 #include <geometry_msgs/PolygonStamped.h>
 #include <geometry_msgs/PointStamped.h>
 
+//_______________Frontier Exploration____________//
 #include <frontier_exploration/geometry_tools.h>
 #include <frontier_exploration/ExploreTaskAction.h>
 #include <frontier_exploration/ExploreTaskActionGoal.h>
 #include <frontier_exploration/GetNextFrontier.h>
 #include <frontier_exploration/UpdateBoundaryPolygon.h>
 
+//_______________Actionlib Server-Client_________//
 #include <tf/transform_listener.h>
+#include <actionlib/client/simple_action_client.h>
 #include <move_base_msgs/MoveBaseAction.h>
-#include <visualization_msgs/Marker.h>
-#include <boost/foreach.hpp>
-
 
 namespace frontier_exploration{
 
@@ -98,7 +101,7 @@ private:
      */
     void pointCb(const geometry_msgs::PointStampedConstPtr& point)
     {
-      
+
         double average_distance = polygonPerimeter(input_.polygon) / input_.polygon.points.size();
 
         if(waiting_for_center_)
@@ -173,7 +176,7 @@ public:
         point_viz_pub_ = nh_.advertise<visualization_msgs::Marker>("exploration_polygon_marker", 10);
         point_viz_timer_ = nh_.createWallTimer(ros::WallDuration(0.1), boost::bind(&FrontierExplorationClient::vizPubCb, this));
         ROS_INFO("Please use the 'Point' tool in Rviz to select an exporation boundary.");
-    }    
+    }
 };
 }
 
