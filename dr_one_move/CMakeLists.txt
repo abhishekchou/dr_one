@@ -28,10 +28,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate actions in the 'action' folder
 add_action_files(
-  DIRECTORY 
-   action
-  FILES
-   move_drone.action
+  DIRECTORY action
+  FILES move_drone.action
  )
 
 ## Generate added messages and services with any dependencies listed here
@@ -58,10 +56,11 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
-add_executable(move_drone_server src/move_drone_server.cpp)
-target_link_libraries(move_drone_server ${catkin_LIBRARIES})
-add_dependencies(move_drone_server dr_one_move_gencpp ${dr_one_move_EXPORTED_TARGETS})
+#add_executable(move_drone_server src/move_drone_server.cpp)
+#target_link_libraries(move_drone_server ${catkin_LIBRARIES} ${actionlib_LIBRARIES})
+#add_dependencies(move_drone_server dr_one_move_gencpp ${dr_one_move_EXPORTED_TARGETS})
 
 
