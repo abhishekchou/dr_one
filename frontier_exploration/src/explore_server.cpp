@@ -12,9 +12,15 @@
 
 #include <tf/transform_listener.h>
 
-#include <move_base_msgs/MoveBaseAction.h>
+// #include <move_base_msgs/MoveBaseAction.h>
+#include <dr_one_move/move_droneAction.h>
 
 #include <frontier_exploration/geometry_tools.h>
+
+using namespace ros;
+using namespace boost;
+using namespace actionlib;
+using namespace std;
 
 namespace frontier_exploration{
 
@@ -34,38 +40,42 @@ public:
      *
      * @param "name" Name for SimpleActionServer
      */
-    FrontierExplorationServer(std::string name) :
-        tf_listener_(ros::Duration(10.0)),
+    FrontierExplorationServer(string name) :
+        tf_listener_(Duration(10.0)),
         private_nh_("~"),
-        as_(nh_, name, boost::bind(&FrontierExplorationServer::executeCb, this, _1), false),
-        move_client_("move_base",true),
+        as_(nh_, name, bind(&FrontierExplorationServer::executeCb, this, _1), false),
+        move_client_("move_drone",true),
         retry_(5)
     {
         private_nh_.param<double>("frequency", frequency_, 0.0);
         private_nh_.param<double>("goal_aliasing", goal_aliasing_, 0.1);
 
-        explore_costmap_ros_ = boost::shared_ptr<costmap_2d::Costmap2DROS>(new costmap_2d::Costmap2DROS("explore_costmap", tf_listener_));
+        explore_costmap_ros_ = shared_ptr<costmap_2d::Costmap2DROS>(new costmap_2d::Costmap2DROS("explore_costmap", tf_listener_));
 
-        as_.registerPreemptCallback(boost::bind(&FrontierExplorationServer::preemptCb, this));
+        as_.registerPreemptCallback(bind(&FrontierExplorationServer::preemptCb, this));
         as_.start();
     }
 
 private:
 
-    ros::NodeHandle nh_;
-    ros::NodeHandle private_nh_;
+    NodeHandle nh_;
+    NodeHandle private_nh_;
     tf::TransformListener tf_listener_;
-    actionlib::SimpleActionServer<frontier_exploration::ExploreTaskAction> as_;
+    SimpleActionServer<frontier_exploration::ExploreTaskAction> as_;
 
-    boost::shared_ptr<costmap_2d::Costmap2DROS> explore_costmap_ros_;
+    shared_ptr<costmap_2d::Costmap2DROS> explore_costmap_ros_;
     double frequency_, goal_aliasing_;
     bool success_, moving_;
     int retry_;
 
-    boost::mutex move_client_lock_;
+    mutex move_client_lock_;
     frontier_exploration::ExploreTaskFeedback feedback_;
-    actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> move_client_;
-    move_base_msgs::MoveBaseGoal move_client_goal_;
+    // SimpleActionClient<move_base_msgs::MoveBaseAction> move_client_;
+    // move_base_msgs::MoveBaseGoal move_client_goal_;
+
+    //Client for to send goals to move_drone actionlib
+    SimpleActionClient<dr_one_move::move_droneAction> move_client_;
+    dr_one_move::move_droneGoal move_client_goal_;
 
     /*
      *  @brief Execute callback for actionserver, run after accepting a new goal
@@ -84,8 +94,8 @@ private:
         explore_costmap_ros_->resetLayers();
 
         //create costmap services
-        ros::ServiceClient updateBoundaryPolygon = private_nh_.serviceClient<frontier_exploration::UpdateBoundaryPolygon>("explore_costmap/explore_boundary/update_boundary_polygon");
-        ros::ServiceClient getNextFrontier = private_nh_.serviceClient<frontier_exploration::GetNextFrontier>("explore_costmap/explore_boundary/get_next_frontier");
+        ServiceClient updateBoundaryPolygon = private_nh_.serviceClient<frontier_exploration::UpdateBoundaryPolygon>("explore_costmap/explore_boundary/update_boundary_polygon");
+        ServiceClient getNextFrontier = private_nh_.serviceClient<frontier_exploration::GetNextFrontier>("explore_costmap/explore_boundary/get_next_frontier");
 
         //wait for move_base and costmap services
         if(!move_client_.waitForServer() ||
@@ -97,7 +107,7 @@ private:
         }
 
         //set region boundary on costmap
-        if(ros::ok() && as_.isActive())
+        if(ok() && as_.isActive())
         {
             frontier_exploration::UpdateBoundaryPolygon srv;
             srv.request.explore_boundary = goal->explore_boundary;
@@ -114,8 +124,8 @@ private:
         }
 
         //loop until all frontiers are explored
-        ros::Rate rate(frequency_);
-        while(ros::ok() && as_.isActive())
+        Rate rate(frequency_);
+        while(ok() && as_.isActive())
         {
 
             frontier_exploration::GetNextFrontier srv;
@@ -141,7 +151,7 @@ private:
             if(goal->explore_boundary.polygon.points.size() > 0 &&
                !pointInPolygon(eval_pose.pose.position,goal->explore_boundary.polygon))
             {
-                
+
                 //check if robot has explored at least one frontier, and promote debug message to warning
                 if(success_)
                 {
@@ -189,12 +199,12 @@ private:
                 {
                     ROS_WARN("Finished exploring room");
                     as_.setSucceeded();
-                    boost::unique_lock<boost::mutex> lock(move_client_lock_);
-                    move_client_.cancelGoalsAtAndBeforeTime(ros::Time::now());
+                    unique_lock<mutex> lock(move_client_lock_);
+                    move_client_.cancelGoalsAtAndBeforeTime(Time::now());
                     return;
 
                 }
-                else if(retry_ == 0 || !ros::ok())
+                else if(retry_ == 0 || !ok())
                 { //search is not successful
 
                     ROS_ERROR("Failed exploration");
@@ -214,10 +224,10 @@ private:
             {
                 ROS_DEBUG("New exploration goal");
                 move_client_goal_.target_pose = goal_pose;
-                boost::unique_lock<boost::mutex> lock(move_client_lock_);
+                unique_lock<mutex> lock(move_client_lock_);
                 if(as_.isActive())
                 {
-                    move_client_.sendGoal(move_client_goal_, boost::bind(&FrontierExplorationServer::doneMovingCb, this, _1, _2),0,boost::bind(&FrontierExplorationServer::feedbackMovingCb, this, _1));
+                    move_client_.sendGoal(move_client_goal_, bind(&FrontierExplorationServer::doneMovingCb, this, _1, _2),0,bind(&FrontierExplorationServer::feedbackMovingCb, this, _1));
                     moving_ = true;
                 }
                 lock.unlock();
@@ -232,9 +242,9 @@ private:
             else
             {
                 //wait for movement to finish before continuing
-                while(ros::ok() && as_.isActive() && moving_)
+                while(ok() && as_.isActive() && moving_)
                 {
-                    ros::WallDuration(0.1).sleep();
+                    WallDuration(0.1).sleep();
                 }
             }
         }
@@ -251,8 +261,8 @@ private:
     void preemptCb()
     {
 
-        boost::unique_lock<boost::mutex> lock(move_client_lock_);
-        move_client_.cancelGoalsAtAndBeforeTime(ros::Time::now());
+        unique_lock<mutex> lock(move_client_lock_);
+        move_client_.cancelGoalsAtAndBeforeTime(Time::now());
         ROS_WARN("Current exploration task cancelled");
 
         if(as_.isActive())
@@ -266,9 +276,9 @@ private:
      * @brief Feedback callback for the move_base client, republishes as feedback for the exploration server
      * @param feedback Feedback from the move_base client
      */
-    void feedbackMovingCb(const move_base_msgs::MoveBaseFeedbackConstPtr& feedback)
+    void feedbackMovingCb(const dr_one_move::move_droneFeedbackConstPtr& feedback)
     {
-        feedback_.base_position = feedback->base_position;
+        feedback_.current_pose = feedback->current_pose;
         as_.publishFeedback(feedback_);
     }
 
@@ -278,14 +288,14 @@ private:
      *  @param state State from the move_base client
      * @param result Result from the move_base client
      */
-    void doneMovingCb(const actionlib::SimpleClientGoalState& state, const move_base_msgs::MoveBaseResultConstPtr& result)
+    void doneMovingCb(const SimpleClientGoalState& state, const dr_one_move::move_droneResultConstPtr& result)
     {
-        if (state == actionlib::SimpleClientGoalState::ABORTED)
+        if (state == SimpleClientGoalState::ABORTED)
         {
             ROS_ERROR("Failed to move");
             as_.setAborted();
         }
-        else if(state == actionlib::SimpleClientGoalState::SUCCEEDED)
+        else if(state == SimpleClientGoalState::SUCCEEDED)
         {
             moving_ = false;
         }
@@ -297,9 +307,9 @@ private:
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "explore_server");
+    init(argc, argv, "explore_server");
 
-    frontier_exploration::FrontierExplorationServer server(ros::this_node::getName());
-    ros::spin();
+    frontier_exploration::FrontierExplorationServer server(this_node::getName());
+    spin();
     return 0;
 }
