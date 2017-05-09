@@ -9,8 +9,9 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   geometry_msgs
+  move_base_msgs
+  tf
 )
-
 
 ## Generate messages in the 'msg' folder
 # add_message_files(
@@ -43,12 +44,12 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES dr_one_move
-  CATKIN_DEPENDS actionlib actionlib_msgs #message_generation roscpp rospy std_msgs
+  CATKIN_DEPENDS actionlib actionlib_msgs roscpp rospy std_msgs #message_generation
   DEPENDS system_lib
 )
 
-###########
 ## Build ##
+###########
 ###########
 
 ## Specify additional locations of header files
@@ -59,8 +60,6 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
 )
 
-#add_executable(move_drone_server src/move_drone_server.cpp)
-#target_link_libraries(move_drone_server ${catkin_LIBRARIES} ${actionlib_LIBRARIES})
-#add_dependencies(move_drone_server dr_one_move_gencpp ${dr_one_move_EXPORTED_TARGETS})
-
-
+add_executable(move_drone_server src/move_drone_server.cpp)
+target_link_libraries(move_drone_server ${catkin_LIBRARIES} ${actionlib_LIBRARIES})
+add_dependencies(move_drone_server dr_one_move_gencpp ${dr_one_move_EXPORTED_TARGETS})
