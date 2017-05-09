@@ -20,6 +20,10 @@
 
 PLUGINLIB_EXPORT_CLASS(frontier_exploration::BoundedExploreLayer, costmap_2d::Layer)
 
+using namespace ros;
+using namespace pcl;
+using namespace std;
+
 namespace frontier_exploration
 {
     using costmap_2d::LETHAL_OBSTACLE;
@@ -36,9 +40,10 @@ namespace frontier_exploration
         dsrv_ = 0;
     }
 
+    //initialize variables set from the parameter server
     void BoundedExploreLayer::onInitialize()
     {
-        ros::NodeHandle nh_("~/" + name_);
+        NodeHandle nh_("~/" + name_);
         frontier_cloud_pub = nh_.advertise<sensor_msgs::PointCloud2>("frontiers",5);
         configured_ = false;
         marked_ = false;
@@ -57,7 +62,7 @@ namespace frontier_exploration
         matchSize();
 
         nh_.param<bool>("resize_to_boundary", resize_to_boundary_, true);
-        nh_.param<std::string>("frontier_travel_point", frontier_travel_point_, "closest");
+        nh_.param<string>("frontier_travel_point", frontier_travel_point_, "closest");
 
         polygonService_ = nh_.advertiseService("update_boundary_polygon", &BoundedExploreLayer::updateBoundaryPolygonService, this);
         frontierService_ = nh_.advertiseService("get_next_frontier", &BoundedExploreLayer::getNextFrontierService, this);
@@ -90,17 +95,17 @@ namespace frontier_exploration
     bool BoundedExploreLayer::getNextFrontier(geometry_msgs::PoseStamped start_pose, geometry_msgs::PoseStamped &next_frontier)
     {
         //wait for costmap to get marked with boundary
-        ros::Rate r(10);
+        Rate r(10);
         while(!marked_)
         {
-            ros::spinOnce();
+            spinOnce();
             r.sleep();
         }
 
         if(start_pose.header.frame_id != layered_costmap_->getGlobalFrameID())
         {
             //error out if no transform available
-            if(!tf_listener_.waitForTransform(layered_costmap_->getGlobalFrameID(), start_pose.header.frame_id,ros::Time::now(),ros::Duration(10)))
+            if(!tf_listener_.waitForTransform(layered_costmap_->getGlobalFrameID(), start_pose.header.frame_id,Time::now(),Duration(10)))
             {
                 ROS_ERROR_STREAM("Couldn't transform from "<<layered_costmap_->getGlobalFrameID()<<" to "<< start_pose.header.frame_id);
                 return false;
@@ -112,7 +117,7 @@ namespace frontier_exploration
         //initialize frontier search implementation
         FrontierSearch frontierSearch(*(layered_costmap_->getCostmap()));
         //get list of frontiers from search implementation
-        std::list<Frontier> frontier_list = frontierSearch.searchFrom(start_pose.pose.position);
+        list<Frontier> frontier_list = frontierSearch.searchFrom(start_pose.pose.position);
 
         if(frontier_list.size() == 0)
         {
@@ -122,11 +127,11 @@ namespace frontier_exploration
 
         //create placeholder for selected frontier
         Frontier selected;
-        selected.min_distance = std::numeric_limits<double>::infinity();
+        selected.min_distance = numeric_limits<double>::infinity();
 
         //pointcloud for visualization purposes
-        pcl::PointCloud<pcl::PointXYZI> frontier_cloud_viz;
-        pcl::PointXYZI frontier_point_viz(50);
+        PointCloud<PointXYZI> frontier_cloud_viz;
+        PointXYZI frontier_point_viz(50);
         int max;
 
         BOOST_FOREACH(Frontier frontier, frontier_list){
@@ -148,14 +153,14 @@ namespace frontier_exploration
 
         //publish visualization point cloud
         sensor_msgs::PointCloud2 frontier_viz_output;
-        pcl::toROSMsg(frontier_cloud_viz,frontier_viz_output);
+        toROSMsg(frontier_cloud_viz,frontier_viz_output);
         frontier_viz_output.header.frame_id = layered_costmap_->getGlobalFrameID();
-        frontier_viz_output.header.stamp = ros::Time::now();
+        frontier_viz_output.header.stamp = Time::now();
         frontier_cloud_pub.publish(frontier_viz_output);
 
         //set goal pose to next frontier
         next_frontier.header.frame_id = layered_costmap_->getGlobalFrameID();
-        next_frontier.header.stamp = ros::Time::now();
+        next_frontier.header.stamp = Time::now();
 
         //
         if(frontier_travel_point_ == "closest")
@@ -201,7 +206,7 @@ namespace frontier_exploration
         polygon_.points.clear();
 
         //error if no transform available between polygon and costmap
-        if(!tf_listener_.waitForTransform(layered_costmap_->getGlobalFrameID(), polygon_stamped.header.frame_id,ros::Time::now(),ros::Duration(10)))
+        if(!tf_listener_.waitForTransform(layered_costmap_->getGlobalFrameID(), polygon_stamped.header.frame_id,Time::now(),Duration(10)))
         {
             ROS_ERROR_STREAM("Couldn't transform from "<<layered_costmap_->getGlobalFrameID()<<" to "<< polygon_stamped.header.frame_id);
             return false;
@@ -220,36 +225,51 @@ namespace frontier_exploration
         //if empty boundary provided, set to whole map
 
         //Change to make polygon always equal to the whole map
+        //        if(polygon_.points.empty())
+        vector<geometry_msgs::Point32> poly_coord(4);
+
         if(polygon_.points.empty()|| !polygon_.points.empty())
-//        if(polygon_.points.empty())
         {
             geometry_msgs::Point32 temp;
             temp.x = getOriginX();
             temp.y = getOriginY();
+            poly_coord[0].x = temp.x;
+            poly_coord[0].y = temp.y;
             polygon_.points.push_back(temp);
+
             temp.y = getSizeInMetersY();
+            poly_coord[1].x = temp.x;
+            poly_coord[1].y = temp.y;
             polygon_.points.push_back(temp);
+
             temp.x = getSizeInMetersX();
+            poly_coord[2].x = temp.x;
+            poly_coord[2].y = temp.y;
             polygon_.points.push_back(temp);
+
             temp.y = getOriginY();
+            poly_coord[3].x = temp.x;
+            poly_coord[3].y = temp.y;
             polygon_.points.push_back(temp);
         }
+
+        ROS_WARN("Polygon Boundary: (%f,%f),(%f,%f),(%f,%f),(%f,%f)",poly_coord[0].x,poly_coord[0].y, poly_coord[1].x,poly_coord[1].y,poly_coord[2].x,poly_coord[2].y,poly_coord[3].x,poly_coord[3].y);
 
         if(resize_to_boundary_)
         {
             updateOrigin(0,0);
 
             //Find map size and origin by finding min/max points of polygon
-            double min_x = std::numeric_limits<double>::infinity();
-            double min_y = std::numeric_limits<double>::infinity();
-            double max_x = -std::numeric_limits<double>::infinity();
-            double max_y = -std::numeric_limits<double>::infinity();
+            double min_x = numeric_limits<double>::infinity();
+            double min_y = numeric_limits<double>::infinity();
+            double max_x = -numeric_limits<double>::infinity();
+            double max_y = -numeric_limits<double>::infinity();
 
             BOOST_FOREACH(geometry_msgs::Point32 point, polygon_.points){
-                min_x = std::min(min_x,(double)point.x);
-                min_y = std::min(min_y,(double)point.y);
-                max_x = std::max(max_x,(double)point.x);
-                max_y = std::max(max_y,(double)point.y);
+                min_x = min(min_x,(double)point.x);
+                min_y = min(min_y,(double)point.y);
+                max_x = max(max_x,(double)point.x);
+                max_y = max(max_y,(double)point.y);
             }
 
             //resize the costmap to polygon boundaries, don't change resolution
