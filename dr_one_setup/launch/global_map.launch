@@ -48,7 +48,7 @@
 
             sensor:
                 observation_sources: laser
-                laser: {data_type: LaserScan, clearing: true, marking: true, topic: scan, inf_is_valid: true, raytrace_range: $(arg sensor_range), obstacle_range: $(arg sensor_range)}
+                laser: {data_type: LaserScan, clearing: true, marking: true, topic: scan_converted, inf_is_valid: true, raytrace_range: $(arg sensor_range), obstacle_range: $(arg sensor_range)}
 
             inflation:
                 inflation_radius: 0.15

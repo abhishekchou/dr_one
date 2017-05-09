@@ -1,0 +1,4 @@
+<launch>
+  <rosparam file="$(find dr_one_setup)/param/move_drone.yaml" command="load"/>
+  <node pkg="dr_one_move" type="move_drone_server" name="move_drone_server" output="screen"/>
+</launch>

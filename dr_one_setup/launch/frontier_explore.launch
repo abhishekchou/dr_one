@@ -14,6 +14,10 @@
   <include file="$(find dr_one_setup)/launch/dr_one_slam.launch" /> -->
  <!--  <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" /> -->
 
-<!-- Launch file for SLAM  -->
+<!-- Launch file for MoveBase replacement actionlib server-->
+  <include file="$(find dr_one_setup)/launch/move_drone.launch" />
+
+<!-- Launch file for Global Map Frontier Search -->
   <include file="$(find dr_one_setup)/launch/global_map.launch" />
+
 </launch>

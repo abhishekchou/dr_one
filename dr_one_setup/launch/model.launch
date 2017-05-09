@@ -1,6 +1,6 @@
 <launch>
 
-  <rosparam file="$(find dr_one_setup)/param/tf_params.yaml" command="load"/>
+  <!-- <rosparam file="$(find dr_one_setup)/param/tf_params.yaml" command="load"/> -->
 
   <param name="dr_one" textfile="$(find dr_one_setup)/urdf/quadrotor_base.urdf" />
 

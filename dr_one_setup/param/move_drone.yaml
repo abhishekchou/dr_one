@@ -1,0 +1,2 @@
+pose_topic: "/vodom"
+goal_topic: "/mavros/setpoints"
