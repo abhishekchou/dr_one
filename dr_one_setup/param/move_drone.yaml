@@ -1,2 +1,2 @@
 pose_topic: "/vodom"
-goal_topic: "/mavros/setpoints"
+goal_topic: "/mavros/setpoints_position/local"
