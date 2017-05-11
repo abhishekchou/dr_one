@@ -4,6 +4,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <dr_one_move/move_droneAction.h>
 
+#include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/Pose2D.h>
 // #include <dr_one_move/move_base.h>
@@ -27,7 +28,8 @@ protected:
     dr_one_move::move_droneResult result_;
 
 private:
-    void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    // void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    void poseCallback(const nav_msgs::Odometry::ConstPtr& msg);
     void exCallback(const dr_one_move::move_droneGoalConstPtr &target);
     double getYAW_(geometry_msgs::Quaternion quat);
     double distance(geometry_msgs::Pose2D start, geometry_msgs::Pose2D end);
@@ -79,11 +81,23 @@ double move_drone::distance(geometry_msgs::Pose2D start, geometry_msgs::Pose2D e
     return distance;
 }
 
+// //Save pose from EKF_POSE/MAVROS_POSE in a PoseStamped variable
+// void move_drone::poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
+// {
+//     pose.header = msg->header;
+//     pose.pose = msg->pose;
+//
+//     //Save from PoseStamped to Pose2D
+//     pose_2d.x = pose.pose.position.x;
+//     pose_2d.y = pose.pose.position.y;
+//     pose_2d.theta = getYAW_(pose.pose.orientation);
+// }
+
 //Save pose from EKF_POSE/MAVROS_POSE in a PoseStamped variable
-void move_drone::poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
+void move_drone::poseCallback(const nav_msgs::Odometry::ConstPtr& msg)
 {
     pose.header = msg->header;
-    pose.pose = msg->pose;
+    pose.pose = msg->pose.pose;
 
     //Save from PoseStamped to Pose2D
     pose_2d.x = pose.pose.position.x;
@@ -91,14 +105,13 @@ void move_drone::poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
     pose_2d.theta = getYAW_(pose.pose.orientation);
 }
 
-
 void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
 {
     Rate loop_rate(20);
     // move_base_msgs::MoveBaseGoal new_target;
     move_droneGoal new_target;
     bool success = false;
-    ROS_WARN("_move_drone_:Sending Setpoint to /mavros/setpoints for drone to navigate");
+    ROS_WARN("_move_drone_:Sending Setpoint to /mavros/setpoints_position/local for drone to navigate");
 
     while(ok() && !success)
     {
