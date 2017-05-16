@@ -30,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -129,7 +129,7 @@ Visualization Manager:
       Marker Topic: /exploration_polygon_marker
       Name: Marker
       Namespaces:
-        {}
+        explore_points: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -219,5 +219,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1247
-  X: 1302
-  Y: 14
+  X: 69
+  Y: 32

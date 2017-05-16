@@ -1,0 +1,9 @@
+<launch>
+<!-- Launch file for exploration-->
+     <include file="$(find dr_one_setup)/launch/frontier_explore.launch">
+
+<!-- Launch file for gazebo_sitl & px4-->
+     <include file="$(find mavros)/launch/px4.launch">
+     <include file="$(find Firmware)/launch/posix_sitl.launch">
+
+</launch>
