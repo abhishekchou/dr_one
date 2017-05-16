@@ -107,7 +107,7 @@ void move_drone::poseCallback(const nav_msgs::Odometry::ConstPtr& msg)
 
 void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
 {
-    Rate loop_rate(20);
+    Rate loop_rate(100);
     // move_base_msgs::MoveBaseGoal new_target;
     move_droneGoal new_target;
     bool success = false;
