@@ -16,6 +16,8 @@ using namespace actionlib;
 using namespace tf;
 using namespace dr_one_move;
 
+bool verbose(true);
+
 
 class move_drone
 {
@@ -32,7 +34,7 @@ private:
     void poseCallback(const nav_msgs::Odometry::ConstPtr& msg);
     void exCallback(const dr_one_move::move_droneGoalConstPtr &target);
     double getYAW_(geometry_msgs::Quaternion quat);
-    double distance(geometry_msgs::Pose2D start, geometry_msgs::Pose2D end);
+    double distance(geometry_msgs::Pose2D start, geometry_msgs::PoseStamped end);
 
 public:
     // move_drone(string name);
@@ -42,7 +44,7 @@ public:
     string _pose_topic, _goal_topic;
 
     geometry_msgs::Pose2D pose_2d; //Save pose from mavros here
-    geometry_msgs::Pose2D goal;
+    geometry_msgs::PoseStamped goal;
     geometry_msgs::PoseStamped pose;
     // vector<geometry_msgs::Pose2D> path;
 
@@ -55,7 +57,7 @@ move_drone(string name) :
     nh_.getParam("pose_topic",_pose_topic);
     nh_.getParam("goal_topic",_goal_topic);
     pose_sub = nh_.subscribe<nav_msgs::Odometry>(_pose_topic.data(), 5, &move_drone::poseCallback, this);
-    goal_pub = nh_.advertise<geometry_msgs::Pose2D>(_goal_topic.data(),5);
+    goal_pub = nh_.advertise<geometry_msgs::PoseStamped>(_goal_topic.data(),5);
 }
 
 ~move_drone()
@@ -72,11 +74,11 @@ double move_drone::getYAW_(geometry_msgs::Quaternion quat)
     return yaw;
 }
 
-double move_drone::distance(geometry_msgs::Pose2D start, geometry_msgs::Pose2D end)
+double move_drone::distance(geometry_msgs::Pose2D start, geometry_msgs::PoseStamped end)
 {
     double distance;
-    double x_diff = start.x - end.x;
-    double y_diff = start.y - end.y;
+    double x_diff = start.x - end.pose.position.x;
+    double y_diff = start.y - end.pose.position.y;
     distance = sqrt( pow(x_diff,2) + pow(y_diff,2) );
     return distance;
 }
@@ -111,7 +113,7 @@ void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
     // move_base_msgs::MoveBaseGoal new_target;
     move_droneGoal new_target;
     bool success = false;
-    ROS_WARN("_move_drone_:Sending Setpoint to /mavros/setpoints_position/local for drone to navigate");
+    ROS_WARN("_move_drone_:Sending Setpoint to mavros for drone to navigate");
 
     while(ok() && !success)
     {
@@ -123,17 +125,41 @@ void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
                 ROS_WARN("_move_drone_:New Goal Received from Exploration");
                 new_target = *action.acceptNewGoal();
 
-                goal.x = new_target.target_pose.pose.position.x;
-                goal.y = new_target.target_pose.pose.position.y;
-                goal.theta = getYAW_(new_target.target_pose.pose.orientation);
+                goal.pose.position = target->target_pose.pose.position;
+                goal.pose.position.z = 1.0;
+                goal.pose.orientation = target->target_pose.pose.orientation;
+
+                // goal.x = new_target.target_pose.pose.position.x;
+                // goal.y = new_target.target_pose.pose.position.y;
+                // goal.theta = getYAW_(new_target.target_pose.pose.orientation);
             }
             else
                 action.setPreempted();
         }
 
-        goal.x = target->target_pose.pose.position.x;
-        goal.y = target->target_pose.pose.position.y;
-        goal.theta = getYAW_(target->target_pose.pose.orientation);
+        // goal.x = target->target_pose.pose.position.x;
+        // goal.y = target->target_pose.pose.position.y;
+        // goal.theta = getYAW_(target->target_pose.pose.orientation);
+
+        goal.pose.position = target->target_pose.pose.position;
+        goal.pose.position.z = 1.0;
+        goal.pose.orientation = target->target_pose.pose.orientation;
+
+
+        if(verbose){
+          ROS_WARN("_move_drone_:Quaternion Goal being to mavros Pose(x=%f, y=%f, z=%f) & Orientation(x=%f, y=%f, z=%f, w=%f)\n",
+                  goal.pose.position.x,
+                  goal.pose.position.y,
+                  goal.pose.position.z,
+                  goal.pose.orientation.x,
+                  goal.pose.orientation.y,
+                  goal.pose.orientation.z,
+                  goal.pose.orientation.w);}
+
+        // ROS_WARN("_move_drone_:Euler Goal being to mavros Pose(x=%f, y=%f, theta=%f)\n",
+        //           goal.x,
+        //           goal.y,
+        //           goal.theta);
 
         goal_pub.publish(goal);
         spinOnce;
