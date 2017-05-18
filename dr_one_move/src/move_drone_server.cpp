@@ -147,12 +147,10 @@ void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
 
 
         if(verbose){
-          ROS_WARN("_move_drone_:Quaternion Goal being to mavros Pose(x=%f, y=%f, z=%f) & Orientation(x=%f, y=%f, z=%f, w=%f)\n",
+          ROS_WARN("_move_drone_:Goal to mavros Pose(x=%f, y=%f, z=%f) & Orient(z=%f, w=%f)\n",
                   goal.pose.position.x,
                   goal.pose.position.y,
                   goal.pose.position.z,
-                  goal.pose.orientation.x,
-                  goal.pose.orientation.y,
                   goal.pose.orientation.z,
                   goal.pose.orientation.w);}
 
