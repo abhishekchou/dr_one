@@ -109,7 +109,7 @@ private:
             //flag is set so this is the last point of boundary polygon, i.e. center
             if(!pointInPolygon(point->point,input_.polygon))
             {
-                ROS_ERROR("Center not inside polygon, restarting");
+                ROS_ERROR("_explore_client_:Center not inside polygon, restarting");
             }
             else
             {
@@ -135,7 +135,7 @@ private:
         //Frame mismatch, restarting polygon selection
         else if(input_.header.frame_id != point->header.frame_id)
         {
-            ROS_ERROR("Frame mismatch, restarting polygon selection");
+            ROS_ERROR("_explore_client_:Frame mismatch, restarting polygon selection");
             input_.polygon.points.clear();
         }
 
@@ -146,13 +146,13 @@ private:
             //check if last boundary point, i.e. nearby to first point
             if(input_.polygon.points.size() < 3)
             {
-                ROS_ERROR("Not a valid polygon, restarting");
+                ROS_ERROR("_explore_client_:Not a valid polygon, restarting");
                 input_.polygon.points.clear();
             }
             else
             {
                 waiting_for_center_ = true;
-                ROS_WARN("Please select an initial point for exploration inside the polygon");
+                ROS_WARN("_explore_client_:Please select an initial point for exploration inside the polygon");
             }
         }
 
@@ -175,7 +175,7 @@ public:
         point_ = nh_.subscribe("/clicked_point",10,&FrontierExplorationClient::pointCb, this);
         point_viz_pub_ = nh_.advertise<visualization_msgs::Marker>("exploration_polygon_marker", 10);
         point_viz_timer_ = nh_.createWallTimer(ros::WallDuration(0.1), boost::bind(&FrontierExplorationClient::vizPubCb, this));
-        ROS_INFO("Please use the 'Point' tool in Rviz to select an exporation boundary.");
+        ROS_INFO("_explore_client_:Please use the 'Point' tool in Rviz to select an exporation boundary.");
     }
 };
 }

@@ -253,7 +253,7 @@ namespace frontier_exploration
             polygon_.points.push_back(temp);
         }
 
-        ROS_WARN("Polygon Boundary: (%f,%f),(%f,%f),(%f,%f),(%f,%f)",poly_coord[0].x,poly_coord[0].y, poly_coord[1].x,poly_coord[1].y,poly_coord[2].x,poly_coord[2].y,poly_coord[3].x,poly_coord[3].y);
+        ROS_WARN("_bounded_layer_:Polygon Boundary: (%f,%f),(%f,%f),(%f,%f),(%f,%f)",poly_coord[0].x,poly_coord[0].y, poly_coord[1].x,poly_coord[1].y,poly_coord[2].x,poly_coord[2].y,poly_coord[3].x,poly_coord[3].y);
 
         if(resize_to_boundary_)
         {

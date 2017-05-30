@@ -113,11 +113,11 @@ private:
             srv.request.explore_boundary = goal->explore_boundary;
             if(updateBoundaryPolygon.call(srv))
             {
-                ROS_INFO("Region boundary set");
+                ROS_INFO("_explore_server_:Region boundary set");
             }
             else
             {
-                ROS_ERROR("Failed to set region boundary");
+                ROS_ERROR("_explore_server_:Failed to set region boundary");
                 as_.setAborted();
                 return;
             }
@@ -155,11 +155,11 @@ private:
                 //check if robot has explored at least one frontier, and promote debug message to warning
                 if(success_)
                 {
-                    ROS_WARN("Robot left exploration boundary, returning to center");
+                    ROS_WARN("_explore_server_:Robot left exploration boundary, returning to center");
                 }
                 else
                 {
-                    ROS_DEBUG("Robot not initially in exploration boundary, traveling to center");
+                    ROS_DEBUG("_explore_server_:Robot not initially in exploration boundary, traveling to center");
                 }
                 //get current robot position in frame of exploration center
                 geometry_msgs::PointStamped eval_point;
@@ -183,7 +183,7 @@ private:
             else if(getNextFrontier.call(srv))
             {
                 //if in boundary, try to find next frontier to search
-                ROS_DEBUG("Found frontier to explore");
+                ROS_DEBUG("_explore_server_:Found frontier to explore");
                 success_ = true;
                 goal_pose = feedback_.next_frontier = srv.response.next_frontier;
                 retry_ = 5;
@@ -192,12 +192,12 @@ private:
             else
             {
                 //if no frontier found, check if search is successful
-                ROS_DEBUG("Couldn't find a frontier");
+                ROS_DEBUG("_explore_server_:Couldn't find a frontier");
 
                 //search is succesful
                 if(retry_ == 0 && success_)
                 {
-                    ROS_WARN("Finished exploring room");
+                    ROS_WARN("_explore_server_:Finished exploring room");
                     as_.setSucceeded();
                     unique_lock<mutex> lock(move_client_lock_);
                     move_client_.cancelGoalsAtAndBeforeTime(Time::now());
@@ -207,12 +207,12 @@ private:
                 else if(retry_ == 0 || !ok())
                 { //search is not successful
 
-                    ROS_ERROR("Failed exploration");
+                    ROS_ERROR("_explore_server_:Failed exploration");
                     as_.setAborted();
                     return;
                 }
 
-                ROS_DEBUG("Retrying...");
+                ROS_DEBUG("_explore_server_:Retrying...");
                 retry_--;
                 //try to find frontier again, without moving robot
                 continue;
@@ -222,7 +222,7 @@ private:
             //check if new goal is close to old goal, hence no need to resend
             if(!moving_ || !pointsNearby(move_client_goal_.target_pose.pose.position,goal_pose.pose.position,goal_aliasing_*0.5))
             {
-                ROS_DEBUG("New exploration goal");
+                ROS_DEBUG("_explore_server_:New exploration goal");
                 move_client_goal_.target_pose = goal_pose;
                 unique_lock<mutex> lock(move_client_lock_);
                 if(as_.isActive())
@@ -263,7 +263,7 @@ private:
 
         unique_lock<mutex> lock(move_client_lock_);
         move_client_.cancelGoalsAtAndBeforeTime(Time::now());
-        ROS_WARN("Current exploration task cancelled");
+        ROS_WARN("_explore_server_:Current exploration task cancelled");
 
         if(as_.isActive())
         {
@@ -292,7 +292,7 @@ private:
     {
         if (state == SimpleClientGoalState::ABORTED)
         {
-            ROS_ERROR("Failed to move");
+            ROS_ERROR("_explore_server_:Failed to move");
             as_.setAborted();
         }
         else if(state == SimpleClientGoalState::SUCCEEDED)

@@ -32,7 +32,7 @@ std::list<Frontier> FrontierSearch::searchFrom(geometry_msgs::Point position)
     unsigned int mx,my;
     if (!costmap_.worldToMap(position.x,position.y,mx,my))
     {
-        ROS_ERROR("Robot out of costmap bounds, cannot search for frontiers");
+        ROS_ERROR("_frontier_search_:Robot out of costmap bounds, cannot search for frontiers");
         return frontier_list;
     }
 
@@ -59,7 +59,7 @@ std::list<Frontier> FrontierSearch::searchFrom(geometry_msgs::Point position)
     else
     {
         bfs.push(pos);
-        ROS_WARN("Could not find nearby clear cell to start search");
+        ROS_WARN("_frontier_search_:Could not find nearby clear cell to start search");
     }
     visited_flag[bfs.front()] = true;
 
