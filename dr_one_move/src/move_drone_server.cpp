@@ -16,7 +16,7 @@ using namespace actionlib;
 using namespace tf;
 using namespace dr_one_move;
 
-bool verbose(true);
+bool verbose(false);
 
 
 class move_drone
@@ -31,7 +31,7 @@ protected:
 
 private:
     // void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
-    void poseCallback(const nav_msgs::Odometry::ConstPtr& msg);
+    void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void exCallback(const dr_one_move::move_droneGoalConstPtr &target);
     double getYAW_(geometry_msgs::Quaternion quat);
     double distance(geometry_msgs::Pose2D start, geometry_msgs::PoseStamped end);
@@ -56,7 +56,7 @@ move_drone(string name) :
     ROS_WARN("_move_drone_:Constructing an object of class MOVE_DRONE");
     nh_.getParam("pose_topic",_pose_topic);
     nh_.getParam("goal_topic",_goal_topic);
-    pose_sub = nh_.subscribe<nav_msgs::Odometry>(_pose_topic.data(), 5, &move_drone::poseCallback, this);
+    pose_sub = nh_.subscribe<geometry_msgs::PoseStamped>(_pose_topic.data(), 5, &move_drone::poseCallback, this);
     goal_pub = nh_.advertise<geometry_msgs::PoseStamped>(_goal_topic.data(),5);
 }
 
@@ -96,15 +96,19 @@ double move_drone::distance(geometry_msgs::Pose2D start, geometry_msgs::PoseStam
 // }
 
 //Save pose from EKF_POSE/MAVROS_POSE in a PoseStamped variable
-void move_drone::poseCallback(const nav_msgs::Odometry::ConstPtr& msg)
+void move_drone::poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
     pose.header = msg->header;
-    pose.pose = msg->pose.pose;
+    pose.pose = msg->pose;
 
     //Save from PoseStamped to Pose2D
     pose_2d.x = pose.pose.position.x;
     pose_2d.y = pose.pose.position.y;
     pose_2d.theta = getYAW_(pose.pose.orientation);
+    if(verbose){
+      ROS_WARN("_move_drone_:Pose:\n x: %f\n y: %f\n z: ----\n Orientation:\n x: \n y: \n z: \ntheta: %f\n",
+                        pose_2d.x, pose_2d.y, pose_2d.theta);
+    }
 }
 
 void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
@@ -146,7 +150,7 @@ void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
         goal.pose.orientation = target->target_pose.pose.orientation;
 
 
-        if(verbose){
+        if(!verbose){
           ROS_WARN("_move_drone_:Goal to mavros Pose(x=%f, y=%f, z=%f) & Orient(z=%f, w=%f)\n",
                   goal.pose.position.x,
                   goal.pose.position.y,
@@ -165,9 +169,10 @@ void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
         loop_rate.sleep();
         if(distance(pose_2d, goal) < 0.20)//If within 20cm of goal
         {
+            ROS_WARN("_move_drone_: Within threshold distance of goal");
             feedback_.current_pose = pose;
             action.publishFeedback(feedback_);
-            success = true;
+            // success = true;
         }
     }//end while
 }
