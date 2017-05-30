@@ -11,7 +11,7 @@
   </node>
 
 <!-- Launch file for SLAM  -->
-  <include file="$(find dr_one_setup)/launch/dr_one_slam.launch" /> -->
+  <include file="$(find dr_one_setup)/launch/slam.launch" /> -->
  <!--  <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" /> -->
 
 <!-- Launch file for MoveBase replacement actionlib server-->

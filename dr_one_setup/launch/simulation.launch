@@ -1,9 +1,28 @@
 <launch>
-<!-- Launch file for exploration-->
-     <include file="$(find dr_one_setup)/launch/frontier_explore.launch">
+  
+  <param name="/use_sim_time" value="true" />
+
+<!--Launch Gazebo and stuff-->
+  <include file="$(find dr_one_setup)/launch/posix_sitl.launch" /> 
+
+<!-- Launch file for Model, Laser & Rviz -->
+<!--  <include file="$(find dr_one_setup)/launch/model.launch"/> -->
+  <include file="$(find dr_one_setup)/launch/gazebo_model.launch"/>
 
 <!-- Launch file for gazebo_sitl & px4-->
-     <include file="$(find mavros)/launch/px4.launch">
-     <include file="$(find Firmware)/launch/posix_sitl.launch">
+     <include file="$(find dr_one_setup)/launch/px4.launch" />
+
+<!-- Launch file for SLAM  -->
+<!--  <include file="$(find dr_one_setup)/launch/slam.launch" /> -->
+  <include file="$(find dr_one_setup)/launch/gazebo_slam.launch" />
+
+<!-- Launch file for Laser Odom  -->
+  <include file="$(find dr_one_setup)/launch/gazebo_laser_odom.launch" />
+
+<!-- Launch file for MoveBase replacement actionlib server-->
+  <include file="$(find dr_one_setup)/launch/move_drone.launch" />
+
+<!-- Launch file for Frontier Search with global map -->
+  <include file="$(find dr_one_setup)/launch/gazebo_global_map.launch" />
 
 </launch>
