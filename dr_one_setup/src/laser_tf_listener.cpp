@@ -40,7 +40,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
         try
         {
             geometry_msgs::PointStamped converted_pt;
-            listener.transformPoint("/base_link",laser_pt,converted_pt);
+            listener.transformPoint("/vodom",laser_pt,converted_pt);
             double converted_range, converted_x, converted_y;
             converted_x = converted_pt.point.x;
             converted_y = converted_pt.point.y;
