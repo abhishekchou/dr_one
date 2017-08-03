@@ -6,7 +6,7 @@ int main(int argc, char** argv)
 {
     ros::init(argc,argv,"tf_publisher");
     ros::NodeHandle n("~");
-    ros::Rate r(100);
+    ros::Rate r(500);
     static tf::TransformBroadcaster broadcaster;
     double _laser_tr_x, _laser_tr_y, _laser_tr_z, _laser_rot_x, _laser_rot_y, _laser_rot_z,
            _cam_tr_x, _cam_tr_y, _cam_tr_z, _cam_rot_x, _cam_rot_y, _cam_rot_z;
@@ -19,13 +19,6 @@ int main(int argc, char** argv)
     n.getParam("laser_rot_x",_laser_rot_x);
     n.getParam("laser_rot_y",_laser_rot_y);
     n.getParam("laser_rot_z",_laser_rot_z);
-
-    n.getParam("camera_tran_x",_cam_tr_x);
-    n.getParam("camera_tran_y",_cam_tr_y);
-    n.getParam("camera_tran_z",_cam_tr_z);
-    n.getParam("camera_rot_x",_cam_rot_x);
-    n.getParam("camera_rot_y",_cam_rot_y);
-    n.getParam("camera_rot_z",_cam_rot_z);
 
 
     //Conversion from deg to rad

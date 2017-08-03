@@ -107,7 +107,7 @@ namespace frontier_exploration
             //error out if no transform available
             if(!tf_listener_.waitForTransform(layered_costmap_->getGlobalFrameID(), start_pose.header.frame_id,Time::now(),Duration(10)))
             {
-                ROS_ERROR_STREAM("Couldn't transform from "<<layered_costmap_->getGlobalFrameID()<<" to "<< start_pose.header.frame_id);
+                ROS_ERROR_STREAM("_bounded_layer_:Couldn't transform from "<<layered_costmap_->getGlobalFrameID()<<" to "<< start_pose.header.frame_id);
                 return false;
             }
             geometry_msgs::PoseStamped temp_pose = start_pose;
@@ -121,7 +121,7 @@ namespace frontier_exploration
 
         if(frontier_list.size() == 0)
         {
-            ROS_DEBUG("No frontiers found, exploration complete");
+            ROS_DEBUG("_bounded_layer_:No frontiers found, exploration complete");
             return false;
         }
 
@@ -177,7 +177,7 @@ namespace frontier_exploration
         }
         else
         {
-            ROS_ERROR("Invalid 'frontier_travel_point' parameter, falling back to 'closest'");
+            ROS_ERROR("_bounded_layer_:Invalid 'frontier_travel_point' parameter, falling back to 'closest'");
             next_frontier.pose.position = selected.initial;
         }
 
@@ -208,7 +208,7 @@ namespace frontier_exploration
         //error if no transform available between polygon and costmap
         if(!tf_listener_.waitForTransform(layered_costmap_->getGlobalFrameID(), polygon_stamped.header.frame_id,Time::now(),Duration(10)))
         {
-            ROS_ERROR_STREAM("Couldn't transform from "<<layered_costmap_->getGlobalFrameID()<<" to "<< polygon_stamped.header.frame_id);
+            ROS_ERROR_STREAM("_bounded_layer_:Couldn't transform from "<<layered_costmap_->getGlobalFrameID()<<" to "<< polygon_stamped.header.frame_id);
             return false;
         }
 
@@ -228,32 +228,48 @@ namespace frontier_exploration
         //        if(polygon_.points.empty())
         vector<geometry_msgs::Point32> poly_coord(4);
 
-        if(polygon_.points.empty()|| !polygon_.points.empty())
-        {
+        //if empty boundary provided, set to whole map
+        if(polygon_.points.empty()){
             geometry_msgs::Point32 temp;
             temp.x = getOriginX();
             temp.y = getOriginY();
-            poly_coord[0].x = temp.x;
-            poly_coord[0].y = temp.y;
             polygon_.points.push_back(temp);
-
             temp.y = getSizeInMetersY();
-            poly_coord[1].x = temp.x;
-            poly_coord[1].y = temp.y;
             polygon_.points.push_back(temp);
-
             temp.x = getSizeInMetersX();
-            poly_coord[2].x = temp.x;
-            poly_coord[2].y = temp.y;
             polygon_.points.push_back(temp);
-
             temp.y = getOriginY();
-            poly_coord[3].x = temp.x;
-            poly_coord[3].y = temp.y;
             polygon_.points.push_back(temp);
         }
 
-        ROS_WARN("_bounded_layer_:Polygon Boundary: (%f,%f),(%f,%f),(%f,%f),(%f,%f)",poly_coord[0].x,poly_coord[0].y, poly_coord[1].x,poly_coord[1].y,poly_coord[2].x,poly_coord[2].y,poly_coord[3].x,poly_coord[3].y);
+
+        // //Polygon points to include the full area of the map- custom
+        // if(polygon_.points.empty()|| !polygon_.points.empty())
+        // {
+        //     geometry_msgs::Point32 temp;
+        //     temp.x = getOriginX();
+        //     temp.y = getOriginY();
+        //     poly_coord[0].x = temp.x;
+        //     poly_coord[0].y = temp.y;
+        //     polygon_.points.push_back(temp);
+        //
+        //     temp.y = getSizeInMetersY();
+        //     poly_coord[1].x = temp.x;
+        //     poly_coord[1].y = temp.y;
+        //     polygon_.points.push_back(temp);
+        //
+        //     temp.x = getSizeInMetersX();
+        //     poly_coord[2].x = temp.x;
+        //     poly_coord[2].y = temp.y;
+        //     polygon_.points.push_back(temp);
+        //
+        //     temp.y = getOriginY();
+        //     poly_coord[3].x = temp.x;
+        //     poly_coord[3].y = temp.y;
+        //     polygon_.points.push_back(temp);
+        // }
+
+        // ROS_WARN("_bounded_layer_:Polygon Boundary: (%f,%f),(%f,%f),(%f,%f),(%f,%f)",poly_coord[0].x,poly_coord[0].y, poly_coord[1].x,poly_coord[1].y,poly_coord[2].x,poly_coord[2].y,poly_coord[3].x,poly_coord[3].y);
 
         if(resize_to_boundary_)
         {

@@ -150,7 +150,7 @@ void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
         goal.pose.orientation = target->target_pose.pose.orientation;
 
 
-        if(!verbose){
+        if(verbose){
           ROS_WARN("_move_drone_:Goal to mavros Pose(x=%f, y=%f, z=%f) & Orient(z=%f, w=%f)\n",
                   goal.pose.position.x,
                   goal.pose.position.y,

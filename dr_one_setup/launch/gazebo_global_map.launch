@@ -14,7 +14,7 @@
             footprint: [[0.1, 0.0], [0.0, 0.1], [-0.1, 0.0], [0.0, -0.1]]
             robot_radius: 0.20
 
-            transform_tolerance: 1.0
+            transform_tolerance: 0.5
             update_frequency: 5.0
             publish_frequency: 5.0
 
@@ -23,7 +23,7 @@
             robot_base_frame: base_link
             resolution: 0.05
 
-            rolling_window: false
+            rolling_window: true
             track_unknown_space: true
 
             plugins:
