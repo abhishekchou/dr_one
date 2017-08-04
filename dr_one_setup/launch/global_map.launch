@@ -19,8 +19,8 @@
             publish_frequency: 5.0
 
             #must match incoming static map
-            global_frame: map
-            robot_base_frame: base_link
+            global_frame: /map
+            robot_base_frame: /base_link
             resolution: 0.05
 
             rolling_window: false
@@ -48,7 +48,7 @@
 
             sensor:
                 observation_sources: laser
-                laser: {data_type: LaserScan, clearing: true, marking: true, topic: scan_converted, inf_is_valid: true, raytrace_range: $(arg sensor_range), obstacle_range: $(arg sensor_range)}
+                laser: {data_type: LaserScan, clearing: true, marking: true, topic: /scan_converted, inf_is_valid: true, raytrace_range: $(arg sensor_range), obstacle_range: $(arg sensor_range)}
 
             inflation:
                 inflation_radius: 0.15

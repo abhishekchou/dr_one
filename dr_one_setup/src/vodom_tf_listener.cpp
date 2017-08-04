@@ -14,7 +14,7 @@ Publisher odom_pub;
 void odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
 {
     TransformListener listener;
-    listener.waitForTransform("vodom","map",Time(0), Duration(5.0));
+    listener.waitForTransform("/vodom","/map",Time(0), Duration(5.0));
 
     nav_msgs::Odometry odom;
     odom.header = msg->header;
@@ -57,11 +57,11 @@ void odomCallback(const nav_msgs::Odometry::ConstPtr& msg)
     try
     {
 //        StampedTransform vodom_to_map;
-        listener.waitForTransform("vodom","map",Time(0), Duration(5.0));
-        listener.transformPose("map",vodom_pose,odom_pose);
+        listener.waitForTransform("/vodom","/map",Time(0), Duration(5.0));
+        listener.transformPose("/map",vodom_pose,odom_pose);
 //        listener.transformQuaternion("/map",vodom_quat,odom_quat);
-        listener.transformVector("map",vodom_twist_angular,odom_twist_angular);
-        listener.transformVector("map",vodom_twist_linear,odom_twist_linear);
+        listener.transformVector("/map",vodom_twist_angular,odom_twist_angular);
+        listener.transformVector("/map",vodom_twist_linear,odom_twist_linear);
 
     }
     catch(TransformException& ex)

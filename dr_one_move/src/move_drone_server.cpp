@@ -101,6 +101,9 @@ void move_drone::poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
     pose.header = msg->header;
     pose.pose = msg->pose;
 
+    //Header from MAVROS Pose topic
+    goal.header = msg->header;
+
     //Save from PoseStamped to Pose2D
     pose_2d.x = pose.pose.position.x;
     pose_2d.y = pose.pose.position.y;

@@ -13,7 +13,7 @@ Publisher laser_pub;
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     tf::TransformListener listener;
-    listener.waitForTransform("/laser","/base_link",Time(0),Duration(5.0));
+    listener.waitForTransform("/base_link","/vodom",Time(0),Duration(5.0));
     sensor_msgs::LaserScan converted_scan;
     converted_scan.header = msg->header;
     converted_scan.angle_min = msg->angle_min;

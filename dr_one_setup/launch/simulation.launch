@@ -1,9 +1,9 @@
 <launch>
-  
+
  <param name="/use_sim_time" value="true" />
 
 <!--Launch Gazebo and stuff-->
-  <include file="$(find dr_one_setup)/launch/posix_sitl.launch" /> 
+  <include file="$(find dr_one_setup)/launch/posix_sitl.launch" />
 
 <!-- Launch file for Model, Laser & Rviz -->
 <!--  <include file="$(find dr_one_setup)/launch/model.launch"/> -->
@@ -21,6 +21,14 @@
 
 <!-- Launch file for MoveBase replacement actionlib server-->
   <include file="$(find dr_one_setup)/launch/move_drone.launch" />
+
+<!-- Launching Node to filter the scan range_max-->
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
+     <rosparam command="load" file="$(find dr_one_setup)/param/laser_filter.yaml" />
+     <remap from="scan" to="/gazebo_scan" />
+     <remap from="scan_filtered" to="/frontier_scan" />
+  </node>
+
 
 <!-- Launch file for Frontier Search with global map -->
   <include file="$(find dr_one_setup)/launch/gazebo_global_map.launch" />

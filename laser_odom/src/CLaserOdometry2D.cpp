@@ -27,7 +27,7 @@ using namespace Eigen;
 //---------------------------------------------
 
 CLaserOdometry2D::CLaserOdometry2D()
-{	
+{
     ROS_INFO("Initializing RF2O node...");
 
     //Read Parameters
@@ -39,7 +39,7 @@ CLaserOdometry2D::CLaserOdometry2D()
     pn.param<double>("freq",freq,10.0);
 
     //Publishers and Subscribers
-    //--------------------------    
+    //--------------------------
     odom_pub = pn.advertise<nav_msgs::Odometry>(odom_frame_id, 5);
     laser_sub = n.subscribe<sensor_msgs::LaserScan>(laser_scan_topic,1,&CLaserOdometry2D::LaserCallBack,this);
 
@@ -80,7 +80,8 @@ void CLaserOdometry2D::Init()
     tf::StampedTransform transform;
     try
     {
-        tf_listener.lookupTransform("/base_link", last_scan.header.frame_id, ros::Time(0), transform);
+        // tf_listener.lookupTransform("/base_link", last_scan.header.frame_id, ros::Time(0), transform);
+        tf_listener.lookupTransform(base_frame_id, last_scan.header.frame_id, ros::Time(0), transform);
     }
     catch (tf::TransformException &ex)
     {
@@ -253,7 +254,7 @@ void CLaserOdometry2D::odometryCalculation()
 void CLaserOdometry2D::createImagePyramid()
 {
 	const float max_range_dif = 0.3f;
-	
+
 	//Push the frames back
 	range_old.swap(range);
 	xx_old.swap(xx);
@@ -269,21 +270,21 @@ void CLaserOdometry2D::createImagePyramid()
     {
         unsigned int s = pow(2.f,int(i));
         cols_i = ceil(float(width)/float(s));
-		
+
 		const unsigned int i_1 = i-1;
 
 		//First level -> Filter (not downsampling);
         if (i == 0)
 		{
 			for (unsigned int u = 0; u < cols_i; u++)
-            {	
+            {
 				const float dcenter = range_wf(u);
-					
+
 				//Inner pixels
                 if ((u>1)&&(u<cols_i-2))
-                {		
+                {
 					if (dcenter > 0.f)
-					{	
+					{
 						float sum = 0.f;
 						float weight = 0.f;
 
@@ -308,16 +309,16 @@ void CLaserOdometry2D::createImagePyramid()
                 else
                 {
                     if (dcenter > 0.f)
-					{						
+					{
 						float sum = 0.f;
 						float weight = 0.f;
 
-						for (int l=-2; l<3; l++)	
+						for (int l=-2; l<3; l++)
 						{
 							const int indu = u+l;
 							if ((indu>=0)&&(indu<cols_i))
 							{
-								const float abs_dif = abs(range_wf(indu)-dcenter);										
+								const float abs_dif = abs(range_wf(indu)-dcenter);
 								if (abs_dif < max_range_dif)
 								{
 									const float aux_w = g_mask[2+l]*(max_range_dif - abs_dif);
@@ -338,17 +339,17 @@ void CLaserOdometry2D::createImagePyramid()
         //                              Downsampling
         //-----------------------------------------------------------------------------
         else
-        {            
+        {
 			for (unsigned int u = 0; u < cols_i; u++)
             {
-                const int u2 = 2*u;		
+                const int u2 = 2*u;
 				const float dcenter = range[i_1](u2);
-					
+
 				//Inner pixels
                 if ((u>0)&&(u<cols_i-1))
-                {		
+                {
 					if (dcenter > 0.f)
-					{	
+					{
 						float sum = 0.f;
 						float weight = 0.f;
 
@@ -373,18 +374,18 @@ void CLaserOdometry2D::createImagePyramid()
                 else
                 {
                     if (dcenter > 0.f)
-					{						
+					{
 						float sum = 0.f;
 						float weight = 0.f;
 						const unsigned int cols_i2 = range[i_1].cols();
 
 
-						for (int l=-2; l<3; l++)	
+						for (int l=-2; l<3; l++)
 						{
 							const int indu = u2+l;
 							if ((indu>=0)&&(indu<cols_i2))
 							{
-								const float abs_dif = abs(range[i_1](indu)-dcenter);										
+								const float abs_dif = abs(range[i_1](indu)-dcenter);
 								if (abs_dif < max_range_dif)
 								{
 									const float aux_w = g_mask[2+l]*(max_range_dif - abs_dif);
@@ -403,7 +404,7 @@ void CLaserOdometry2D::createImagePyramid()
         }
 
         //Calculate coordinates "xy" of the points
-        for (unsigned int u = 0; u < cols_i; u++) 
+        for (unsigned int u = 0; u < cols_i; u++)
 		{
             if (range[i](u) > 0.f)
 			{
@@ -423,7 +424,7 @@ void CLaserOdometry2D::createImagePyramid()
 
 
 void CLaserOdometry2D::calculateCoord()
-{		
+{
 	for (unsigned int u = 0; u < cols_i; u++)
 	{
 		if ((range_old[image_level](u) == 0.f) || (range_warped[image_level](u) == 0.f))
@@ -443,12 +444,12 @@ void CLaserOdometry2D::calculateCoord()
 
 
 void CLaserOdometry2D::calculaterangeDerivativesSurface()
-{	
+{
 	//The gradient size ir reserved at the maximum size (at the constructor)
 
     //Compute connectivity
 	rtita.resize(1,cols_i); 		//Defined in a different way now, without inversion
-    rtita.assign(1.f); 
+    rtita.assign(1.f);
 
 	for (unsigned int u = 0; u < cols_i-1; u++)
     {
@@ -526,15 +527,15 @@ void CLaserOdometry2D::computeWeights()
 {
 	//The maximum weight size is reserved at the constructor
 	weights.assign(0.f);
-	
+
 	//Parameters for error_linearization
 	const float kdtita = 1.f;
 	const float kdt = kdtita/square(fps);
 	const float k2d = 0.2f;
-	
+
 	for (unsigned int u = 1; u < cols_i-1; u++)
 		if (null(u) == 0)
-		{	
+		{
 			//							Compute derivatives
 			//-----------------------------------------------------------------------
 			const float ini_dtita = range_old[image_level](u+1) - range_old[image_level](u-1);
@@ -597,7 +598,7 @@ void CLaserOdometry2D::solveSystemOneLevel()
 
 			cont++;
 		}
-	
+
 	//Solve the linear system of equations using a minimum least squares method
 	MatrixXf AtA, AtB;
 	AtA.multiply_AtA(A);
@@ -723,7 +724,7 @@ void CLaserOdometry2D::Reset(CPose3D ini_pose, CObservation2DRangeScan scan)
 
 void CLaserOdometry2D::performWarping()
 {
-	Matrix3f acu_trans; 
+	Matrix3f acu_trans;
 	acu_trans.setIdentity();
 	for (unsigned int i=1; i<=level; i++)
 		acu_trans = transformations[i-1]*acu_trans;
@@ -736,7 +737,7 @@ void CLaserOdometry2D::performWarping()
 	const float kdtita = cols_lim/fovh;
 
 	for (unsigned int j = 0; j<cols_i; j++)
-	{				
+	{
 		if (range[image_level](j) > 0.f)
 		{
 			//Transform point to the warped reference frame
@@ -778,7 +779,7 @@ void CLaserOdometry2D::performWarping()
 
 	//Scale the averaged range and compute coordinates
 	for (unsigned int u = 0; u<cols_i; u++)
-	{	
+	{
 		if (wacu(u) > 0.f)
 		{
 			const float tita = -0.5f*fovh + float(u)/kdtita;
@@ -804,12 +805,12 @@ void CLaserOdometry2D::filterLevelSolution()
 	//		Calculate Eigenvalues and Eigenvectors
 	//----------------------------------------------------------
 	SelfAdjointEigenSolver<MatrixXf> eigensolver(cov_odo);
-	if (eigensolver.info() != Success) 
-	{ 
+	if (eigensolver.info() != Success)
+	{
 		printf("Eigensolver couldn't find a solution. Pose is not updated");
 		return;
 	}
-	
+
 	//First, we have to describe both the new linear and angular speeds in the "eigenvector" basis
 	//-------------------------------------------------------------------------------------------------
 	Matrix<float,3,3> Bii;
@@ -914,12 +915,12 @@ void CLaserOdometry2D::PoseUpdate()
 
 
     // GET ROBOT POSE from LASER POSE
-    //------------------------------  
+    //------------------------------
     mrpt::poses::CPose3D LaserPoseOnTheRobot_inv;
     tf::StampedTransform transform;
     try
     {
-        tf_listener.lookupTransform(last_scan.header.frame_id, "/base_link", ros::Time(0), transform);
+        tf_listener.lookupTransform(last_scan.header.frame_id, base_frame_id, ros::Time(0), transform);
     }
     catch (tf::TransformException &ex)
     {
@@ -1051,7 +1052,7 @@ int main(int argc, char** argv)
         ros::spinOnce();        //Check for new laser scans
 
         if( myLaserOdom.is_initialized() && myLaserOdom.scan_available() )
-        {            
+        {
             //Process odometry estimation
             myLaserOdom.odometryCalculation();
         }

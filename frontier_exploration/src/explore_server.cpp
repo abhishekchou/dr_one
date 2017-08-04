@@ -146,8 +146,6 @@ private:
             {
                 tf_listener_.transformPose(goal->explore_boundary.header.frame_id, srv.request.start_pose, eval_pose);
             }
-            ROS_ERROR("_explore_server_::I AM HERE");
-
 
             //check if robot is not within exploration boundary and needs to return to center of search area
             if(goal->explore_boundary.polygon.points.size() > 0 &&
