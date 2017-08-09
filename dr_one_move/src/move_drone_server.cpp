@@ -172,10 +172,11 @@ void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
         loop_rate.sleep();
         if(distance(pose_2d, goal) < 0.20)//If within 20cm of goal
         {
-            ROS_WARN("_move_drone_: Within threshold distance of goal");
+            ROS_WARN_THROTTLE(10.0,"_move_drone_: Within threshold distance of goal");
             feedback_.current_pose = pose;
             action.publishFeedback(feedback_);
-            // success = true;
+            action.setSucceeded();
+            success = true;
         }
     }//end while
 }
