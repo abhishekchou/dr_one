@@ -1,0 +1,8 @@
+GlobalPlannerROS:
+    allow_unknown: false
+    default_tolerance: 0.1
+    visualize_potential: false
+    use_djikstra: false
+    use_grid_path: false
+    use_quadratic: true
+    old_navfn_behavious: false

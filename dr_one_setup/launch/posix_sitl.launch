@@ -9,8 +9,12 @@
     <arg name="Y" default="0"/>
     <arg name="est" default="lpe"/>
     <arg name="vehicle" default="drone"/>
-    <!--<arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/room_no_drone.world"/> -->
-    <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/floor_plan.world"/>
+
+    <!-- <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/empty.world"/> -->
+    <!-- <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/room_no_drone.world"/> -->
+    <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/room_single.world"/>
+    <!-- <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/room_multi.world"/> -->
+
     <arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
     <arg name="rcS" default="$(find px4)/posix-configs/SITL/init/$(arg est)/iris"/>
 
