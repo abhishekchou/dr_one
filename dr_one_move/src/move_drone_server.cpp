@@ -16,7 +16,7 @@ using namespace actionlib;
 using namespace tf;
 using namespace dr_one_move;
 
-bool verbose(false);
+bool verbose(true);
 
 
 class move_drone
@@ -109,8 +109,8 @@ void move_drone::poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
     pose_2d.y = pose.pose.position.y;
     pose_2d.theta = getYAW_(pose.pose.orientation);
     if(verbose){
-      ROS_WARN("_move_drone_:Pose:\n x: %f\n y: %f\n z: ----\n Orientation:\n x: \n y: \n z: \ntheta: %f\n",
-                        pose_2d.x, pose_2d.y, pose_2d.theta);
+      ROS_WARN("_move_drone_:Pose:\n x: %f\n y: %f\n",
+                        pose_2d.x, pose_2d.y);
     }
 }
 
@@ -153,8 +153,8 @@ void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
         goal.pose.orientation = target->target_pose.pose.orientation;
 
 
-        if(verbose){
-          ROS_WARN("_move_drone_:Goal to mavros Pose(x=%f, y=%f, z=%f) & Orient(z=%f, w=%f)\n",
+        if(!verbose){
+          ROS_WARN_THROTTLE(10.0,"_move_drone_:Goal to mavros Pose(x=%f, y=%f, z=%f) & Orient(z=%f, w=%f)\n",
                   goal.pose.position.x,
                   goal.pose.position.y,
                   goal.pose.position.z,
@@ -170,9 +170,9 @@ void move_drone::exCallback(const dr_one_move::move_droneGoalConstPtr &target)
         spinOnce;
 
         loop_rate.sleep();
-        if(distance(pose_2d, goal) < 0.20)//If within 20cm of goal
+        if(distance(pose_2d, goal) < 0.50)//If within 10cm of goal
         {
-            ROS_WARN_THROTTLE(10.0,"_move_drone_: Within threshold distance of goal");
+            ROS_WARN_THROTTLE(5.0,"_move_drone_: Within threshold distance of goal(distance = %f)\n",distance(pose_2d,goal) );
             feedback_.current_pose = pose;
             action.publishFeedback(feedback_);
             action.setSucceeded();
